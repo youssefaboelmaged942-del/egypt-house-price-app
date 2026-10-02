@@ -13,14 +13,24 @@ st.set_page_config(page_title="Egypt Real Estate Price Predictor", page_icon="�
 # 2. حقن CSS لتصميم حديث
 st.markdown("""
 <style>
-    /* خلفية البطاقات وتحسين الظلال */
+    /* 1. خلفية الصفحة بالكامل والصورة */
+    .stApp {
+        background: linear-gradient(rgba(14, 17, 23, 0.82), rgba(14, 17, 23, 0.82)), 
+                    url("https://unsplash.com/photos/a-row-of-white-houses-with-a-red-roof-1S1mk3uDDDAا");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    /* 2. خلفية البطاقات وتحسين الظلال */
     div[data-testid="stForm"] {
-        background-color: #1e222d;
+        background-color: rgba(30, 34, 45, 0.88) !important;
         border: 1px solid #2e3545;
         border-radius: 12px;
         padding: 20px;
     }
-    /* تحسين شكل بطاقات النشر والنتائج */
+
+    /* 3. تحسين شكل بطاقات النشر والنتائج */
     div[data-testid="stMetricValue"] {
         font-size: 1.8rem !important;
         color: #4CAF50;
