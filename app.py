@@ -7,13 +7,21 @@ import plotly.express as px
 import streamlit as st
 from catboost import CatBoostRegressor
 
-# 1. إعداد الصفحة بشكل واسع (Wide Layout)
+# 1. إعداد الصفحة
 st.set_page_config(page_title="Egypt Real Estate Price Predictor", page_icon="🏠", layout="wide")
 
-# 2. حقن CSS لتصميم حديث
-st.markdown("""
+# 2. حقن CSS مضغوط لمنع الـ Scroll وتثبيت الشاشة
+st.markdown(
+    """
 <style>
-    /* 1. الخلفية مع صورة واضحة وتعتيم خفيف جداً */
+    /* تقليل المسافات العليا من أعلى الصفحة */
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 0rem !important;
+        max-width: 98% !important;
+    }
+
+    /* الخلفية */
     .stApp {
         background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
                     url("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1920&auto=format&fit=crop") !important;
@@ -22,27 +30,40 @@ st.markdown("""
         background-attachment: fixed !important;
     }
 
-    /* 2. تحويل كل النصوص للأبيض عشان تبان بوضوح فوق الخلفية */
-    h1, h2, h3, h4, h5, h6, p, span, label, .stCaption {
+    /* تحويل النصوص للأبيض */
+    h1, h2, h3, h4, h5, h6, p, span, label, div, .stCaption {
         color: #ffffff !important;
     }
 
-    /* 3. كارت المدخلات بجهة اليسار مع خلفية شفافة زجاجية */
+    /* ضغط كارت المدخلات تقليل الـ Padding */
     div[data-testid="stForm"] {
-        background-color: rgba(15, 23, 42, 0.75) !important;
-        backdrop-filter: blur(8px);
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 16px;
-        padding: 20px;
+        border-radius: 12px;
+        padding: 12px 18px !important;
     }
 
-    /* 4. إبراز عناوين المدخلات فوق الحقول */
-    div[data-testid="stForm"] label {
-        color: #f1f5f9 !important;
-        font-weight: 600;
+    /* ضغط بطاقات النتائج */
+    div[data-testid="stMetric"] {
+        background-color: rgba(30, 38, 54, 0.85);
+        border-radius: 10px;
+        padding: 8px 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    div[data-testid="stMetricValue"] {
+        font-size: 1.5rem !important;
+    }
+
+    /* تقليل مسافات الحقول والمُدخلات */
+    .stSelectbox, .stNumberInput {
+        margin-bottom: -10px !important;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 BASE = Path(__file__).parent
 
@@ -70,7 +91,6 @@ FEATURES = meta["features"]
 
 
 def build_features(inp: dict) -> pd.DataFrame:
-    """Same feature engineering used in training."""
     d = pd.DataFrame([inp])
     beds = d["Bedrooms"].replace(0, np.nan)
     d["Level_num"] = pd.to_numeric(d["Level"].replace({"Ground": 0, "Highest": 12, "10+": 11}), errors="coerce")
@@ -87,21 +107,19 @@ def egp(x: float) -> str:
     return f"{x:,.0f} EGP"
 
 
-# ---------------- Header ----------------
-st.title("🏠 Egypt Real Estate")
-st.caption("AI-powered property valuation and market positioning analytics (CatBoost Regressor).")
-st.divider()
+# ---------------- Header مختصر في سطر واحد ----------------
+st.title("🏠 Egypt Real Estate Valuation SaaS")
 
 # ---------------- Dashboard Layout (2 Columns) ----------------
-col_input, col_results = st.columns([1, 1.2], gap="large")
+col_input, col_results = st.columns([1, 1.15], gap="medium")
 
 with col_input:
-    st.subheader("📋 Property Details")
+    st.markdown("##### 📋 Property Details")
     with st.form("property_form"):
         c1, c2 = st.columns(2)
         with c1:
             city = st.selectbox("City", opt["City"])
-            compound = st.selectbox("Compound", opt["Compound"], help="Choose 'Unknown' if you don't know it, or 'Not In Compound'.")
+            compound = st.selectbox("Compound", opt["Compound"])
             area = st.number_input("Area (m²)", min_value=float(meta["area_limits"][0]),
                                    max_value=float(meta["area_limits"][1]), value=150.0, step=5.0)
             delivery = st.selectbox("Delivery term", opt["Delivery_Term"])
@@ -122,28 +140,22 @@ with col_results:
         price = ppm_pred * area
         low, high = price * meta["range_ratio"]["p10"], price * meta["range_ratio"]["p90"]
 
-        st.subheader("📊 Price Valuation Results")
+        st.markdown("##### 📊 Price Valuation Results")
         
         # Display Key Metrics
         m1, m2 = st.columns(2)
         m1.metric("Estimated Market Price", egp(price))
         m2.metric("Predicted Price / m²", egp(ppm_pred))
 
-        st.info(f"💡 **Likely Price Range (80% Confidence):** {egp(low)} – {egp(high)}")
+        st.info(f"💡 **Likely Range:** {egp(low)} – {egp(high)}")
 
         city_ppm = meta["city_median_ppm"].get(city, meta["global_median_ppm"])
         diff_pct = (ppm_pred / city_ppm - 1) * 100
         
-        st.write(f"**City Benchmark:** Median in **{city}** is `{egp(city_ppm)}` / m² ({diff_pct:+.1f}% vs city median).")
+        st.caption(f"**City Benchmark:** Median in **{city}** is `{egp(city_ppm)}` / m² ({diff_pct:+.1f}% vs city median).")
 
-        if compound == "Unknown" or level == "Unknown" or furnished == "Unknown":
-            st.warning("⚠️ Some fields are set to 'Unknown'. Providing exact details sharpens the accuracy.")
-
-        # Plotly Interactive Chart: City Comparison
-        st.subheader("🏙️ City Market Benchmark (Price/m²)")
-        
-        # Prepare comparison data
-        top_cities = dict(list(meta["city_median_ppm"].items())[:6])
+        # Plotly Interactive Chart بفرع مرتفع أصغر ليتناسب مع الشاشة
+        top_cities = dict(list(meta["city_median_ppm"].items())[:5])
         top_cities[f"Your Property ({city})"] = ppm_pred
         
         df_chart = pd.DataFrame(list(top_cities.items()), columns=["Location", "Price_per_m2"]).sort_values("Price_per_m2")
@@ -154,24 +166,25 @@ with col_results:
             y="Location", 
             orientation="h",
             color="Location",
-            title="Comparison with Top Cities Median Price/m²",
+            title="Price/m² vs Top Cities",
             text_auto=".0f"
         )
-        fig.update_layout(showlegend=False, height=300, margin=dict(l=20, r=20, t=40, b=20))
+        # ارتفاع الرسم البياني 200px لكي لا يسبب Scroll
+        fig.update_layout(
+            showlegend=False, 
+            height=200, 
+            margin=dict(l=10, r=10, t=30, b=10), 
+            paper_bgcolor="rgba(0,0,0,0)", 
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#ffffff")
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     else:
-        st.subheader("📊 Real-Time Analytics Dashboard")
+        st.markdown("##### 📊 Real-Time Analytics Dashboard")
         st.info("👈 Fill in the property details on the left and click **Predict & Analyze Price** to view the interactive AI report.")
 
-st.divider()
-
-# Footer / Model Info
-with st.expander("ℹ️ About the Valuation Model & Data"):
+# Footer مختصر في expander أسفل الشاشة
+with st.expander("ℹ️ About Model"):
     t = meta["test_metrics"]
-    st.write(
-        f"- **Algorithm:** CatBoost Regressor trained on Egyptian property market listings.\n"
-        f"- **Performance Metrics:** Evaluated on {t['Rows']:,} listings — R² = {t['R2']}, "
-        f"Median Absolute Error ≈ {t['MedAPE']}%, and {t['Within30']}% of predictions fall within 30% of market listing prices.\n"
-        f"- **Disclaimer:** Estimates reflect market asking prices, not official legal appraisals."
-    )
+    st.write(f"CatBoost Regressor | R² = {t['R2']} | MedAPE ≈ {t['MedAPE']}%")
