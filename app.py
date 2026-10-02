@@ -13,27 +13,33 @@ st.set_page_config(page_title="Egypt Real Estate Price Predictor", page_icon="�
 # 2. حقن CSS لتصميم حديث
 st.markdown("""
 <style>
-    /* 1. خلفية الصفحة بالكامل والصورة */
+    /* 1. الخلفية مع صورة واضحة وتعتيم خفيف جداً */
     .stApp {
-        background: linear-gradient(rgba(14, 17, 23, 0.82), rgba(14, 17, 23, 0.82)), 
-                    url("https://unsplash.com/photos/a-row-of-white-houses-with-a-red-roof-1S1mk3uDDDAا");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+        background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
+                    url("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1920&auto=format&fit=crop") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-attachment: fixed !important;
     }
 
-    /* 2. خلفية البطاقات وتحسين الظلال */
+    /* 2. تحويل كل النصوص للأبيض عشان تبان بوضوح فوق الخلفية */
+    h1, h2, h3, h4, h5, h6, p, span, label, .stCaption {
+        color: #ffffff !important;
+    }
+
+    /* 3. كارت المدخلات بجهة اليسار مع خلفية شفافة زجاجية */
     div[data-testid="stForm"] {
-        background-color: rgba(30, 34, 45, 0.88) !important;
-        border: 1px solid #2e3545;
-        border-radius: 12px;
+        background-color: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 16px;
         padding: 20px;
     }
 
-    /* 3. تحسين شكل بطاقات النشر والنتائج */
-    div[data-testid="stMetricValue"] {
-        font-size: 1.8rem !important;
-        color: #4CAF50;
+    /* 4. إبراز عناوين المدخلات فوق الحقول */
+    div[data-testid="stForm"] label {
+        color: #f1f5f9 !important;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
