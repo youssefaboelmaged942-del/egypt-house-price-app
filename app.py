@@ -72,7 +72,7 @@ def egp(x: float) -> str:
 
 
 # ---------------- Header ----------------
-st.title("🏠 Egypt Real Estate Valuation SaaS")
+st.title("🏠 Egypt Real Estate")
 st.caption("AI-powered property valuation and market positioning analytics (CatBoost Regressor).")
 st.divider()
 
