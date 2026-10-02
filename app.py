@@ -14,37 +14,48 @@ st.set_page_config(page_title="Egypt Real Estate Price Predictor", page_icon="�
 st.markdown(
     """
 <style>
-    /* توسيط المحتوى رأسياً في منتصف الشاشة */
+    /* 1. توسيط الشاشة وتقليل الحواف */
     .main .block-container {
         max-width: 95% !important;
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
     }
 
-    /* الخلفية الرئيسية */
+    /* 2. الخلفية الرئيسية للتطبيق */
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), 
                     url("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1920&auto=format&fit=crop") !important;
         background-size: cover !important;
         background-position: center !important;
         background-attachment: fixed !important;
     }
 
-    /* تحويل كل النصوص للون الأبيض الناصع */
-    h1, h2, h3, h4, h5, h6, p, span, label, div, .stCaption {
+    /* 3. العناوين والنصوص الأساسية فقط باللون الأبيض */
+    h1, h2, h3, h4, h5, h6, .stMarkdown p, label {
         color: #ffffff !important;
     }
 
-    /* خلفية داكنة واضحة للـ Form */
+    /* 4. خلفية داكنة للـ Form */
     div[data-testid="stForm"] {
         background-color: rgba(15, 23, 42, 0.92) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 12px;
         padding: 16px 20px !important;
         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
-    /* خلفية داكنة لكروت النتائج */
+    /* 5. إصلاح ألوان القوائم المنسدلة (Dropdowns) لضمان ظهور الكلام بوضوح */
+    div[data-baseweb="select"] * {
+        color: #0f172a !important; /* لون داكن وواضح للنصوص داخل الخيارات والقوائم */
+    }
+    
+    /* جعل نص خيار القائمة المحدد بالكامل واضح */
+    div[aria-selected="true"] {
+        color: #0f172a !important;
+        font-weight: bold;
+    }
+
+    /* 6. خلفيات كروت النتائج */
     div[data-testid="stMetric"] {
         background-color: rgba(15, 23, 42, 0.92) !important;
         border-radius: 10px;
@@ -55,10 +66,10 @@ st.markdown(
     
     div[data-testid="stMetricValue"] {
         font-size: 1.6rem !important;
-        color: #38bdf8 !important; /* لون أزرق فاتح مميز للأرقام */
+        color: #38bdf8 !important;
     }
 
-    /* خلفية صندوق الـ Info والتوضيحات */
+    /* 7. خلفية صندوق المعلومات */
     .stAlert {
         background-color: rgba(15, 23, 42, 0.9) !important;
         color: #ffffff !important;
