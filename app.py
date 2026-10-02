@@ -112,7 +112,7 @@ def egp(x: float) -> str:
 
 
 # ---------------- Header ----------------
-st.title("🏠 Egypt Real Estate Valuation SaaS")
+st.title("🏠  Egypt Real Estate Price Predictor ")
 
 # ---------------- Dashboard Layout ----------------
 col_input, col_results = st.columns([1, 1.15], gap="large")
