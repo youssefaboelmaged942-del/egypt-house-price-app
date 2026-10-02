@@ -10,55 +10,59 @@ from catboost import CatBoostRegressor
 # 1. إعداد الصفحة
 st.set_page_config(page_title="Egypt Real Estate Price Predictor", page_icon="🏠", layout="wide")
 
-# 2. حقن CSS مضغوط لمنع الـ Scroll وتثبيت الشاشة
+# 2. حقن CSS للتوسيط الرأسي وتحسين وضوح النصوص والخلفيات
 st.markdown(
     """
 <style>
-    /* تقليل المسافات العليا من أعلى الصفحة */
-    .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 0rem !important;
-        max-width: 98% !important;
+    /* توسيط المحتوى رأسياً في منتصف الشاشة */
+    .main .block-container {
+        max-width: 95% !important;
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
     }
 
-    /* الخلفية */
+    /* الخلفية الرئيسية */
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                     url("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1920&auto=format&fit=crop") !important;
         background-size: cover !important;
         background-position: center !important;
         background-attachment: fixed !important;
     }
 
-    /* تحويل النصوص للأبيض */
+    /* تحويل كل النصوص للون الأبيض الناصع */
     h1, h2, h3, h4, h5, h6, p, span, label, div, .stCaption {
         color: #ffffff !important;
     }
 
-    /* ضغط كارت المدخلات تقليل الـ Padding */
+    /* خلفية داكنة واضحة للـ Form */
     div[data-testid="stForm"] {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        background-color: rgba(15, 23, 42, 0.92) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
         border-radius: 12px;
-        padding: 12px 18px !important;
+        padding: 16px 20px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
-    /* ضغط بطاقات النتائج */
+    /* خلفية داكنة لكروت النتائج */
     div[data-testid="stMetric"] {
-        background-color: rgba(30, 38, 54, 0.85);
+        background-color: rgba(15, 23, 42, 0.92) !important;
         border-radius: 10px;
-        padding: 8px 12px !important;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 10px 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
     
     div[data-testid="stMetricValue"] {
-        font-size: 1.5rem !important;
+        font-size: 1.6rem !important;
+        color: #38bdf8 !important; /* لون أزرق فاتح مميز للأرقام */
     }
 
-    /* تقليل مسافات الحقول والمُدخلات */
-    .stSelectbox, .stNumberInput {
-        margin-bottom: -10px !important;
+    /* خلفية صندوق الـ Info والتوضيحات */
+    .stAlert {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
     }
 </style>
 """,
@@ -107,21 +111,21 @@ def egp(x: float) -> str:
     return f"{x:,.0f} EGP"
 
 
-# ---------------- Header مختصر في سطر واحد ----------------
+# ---------------- Header ----------------
 st.title("🏠 Egypt Real Estate Valuation SaaS")
 
-# ---------------- Dashboard Layout (2 Columns) ----------------
-col_input, col_results = st.columns([1, 1.15], gap="medium")
+# ---------------- Dashboard Layout ----------------
+col_input, col_results = st.columns([1, 1.15], gap="large")
 
 with col_input:
-    st.markdown("##### 📋 Property Details")
+    st.markdown("### 📋 Property Details")
     with st.form("property_form"):
         c1, c2 = st.columns(2)
         with c1:
             city = st.selectbox("City", opt["City"])
             compound = st.selectbox("Compound", opt["Compound"])
             area = st.number_input("Area (m²)", min_value=float(meta["area_limits"][0]),
-                                   max_value=float(meta["area_limits"][1]), value=150.0, step=5.0)
+                                   max_value=float(meta["area_limits"][1]), value=205.0, step=5.0)
             delivery = st.selectbox("Delivery term", opt["Delivery_Term"])
         with c2:
             bedrooms = st.number_input("Bedrooms", min_value=0, max_value=15, value=3, step=1)
@@ -131,7 +135,12 @@ with col_input:
             
         submitted = st.form_submit_button("⚡ Predict & Analyze Price", type="primary", use_container_width=True)
 
+    with st.expander("ℹ️ About Model"):
+        t = meta["test_metrics"]
+        st.write(f"CatBoost Regressor | R² = {t['R2']} | MedAPE ≈ {t['MedAPE']}%")
+
 with col_results:
+    st.markdown("### 📊 Price Valuation Results")
     if submitted:
         inp = {"Bedrooms": int(bedrooms), "Bathrooms": int(bathrooms), "Area": float(area), "Furnished": furnished,
                "Level": level, "Compound": compound, "Delivery_Term": delivery, "City": city}
@@ -140,8 +149,6 @@ with col_results:
         price = ppm_pred * area
         low, high = price * meta["range_ratio"]["p10"], price * meta["range_ratio"]["p90"]
 
-        st.markdown("##### 📊 Price Valuation Results")
-        
         # Display Key Metrics
         m1, m2 = st.columns(2)
         m1.metric("Estimated Market Price", egp(price))
@@ -152,9 +159,9 @@ with col_results:
         city_ppm = meta["city_median_ppm"].get(city, meta["global_median_ppm"])
         diff_pct = (ppm_pred / city_ppm - 1) * 100
         
-        st.caption(f"**City Benchmark:** Median in **{city}** is `{egp(city_ppm)}` / m² ({diff_pct:+.1f}% vs city median).")
+        st.markdown(f"📍 **City Benchmark:** Median in **{city}** is `{egp(city_ppm)}` / m² ({diff_pct:+.1f}% vs city median).")
 
-        # Plotly Interactive Chart بفرع مرتفع أصغر ليتناسب مع الشاشة
+        # Plotly Chart مع إعطائه خلفية داكنة وتحسين خطوطه
         top_cities = dict(list(meta["city_median_ppm"].items())[:5])
         top_cities[f"Your Property ({city})"] = ppm_pred
         
@@ -166,25 +173,23 @@ with col_results:
             y="Location", 
             orientation="h",
             color="Location",
-            title="Price/m² vs Top Cities",
+            title="Price/m² Comparison",
             text_auto=".0f"
         )
-        # ارتفاع الرسم البياني 200px لكي لا يسبب Scroll
+        
         fig.update_layout(
             showlegend=False, 
-            height=200, 
-            margin=dict(l=10, r=10, t=30, b=10), 
-            paper_bgcolor="rgba(0,0,0,0)", 
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#ffffff")
+            height=260, 
+            margin=dict(l=10, r=20, t=35, b=10), 
+            paper_bgcolor="rgba(15, 23, 42, 0.92)", 
+            plot_bgcolor="rgba(15, 23, 42, 0.92)",
+            font=dict(color="#ffffff", size=12),
+            title_font=dict(color="#ffffff", size=14)
         )
+        fig.update_xaxes(title="", tickfont=dict(color="#ffffff"), gridcolor="rgba(255,255,255,0.1)")
+        fig.update_yaxes(title="", tickfont=dict(color="#ffffff"))
+        
         st.plotly_chart(fig, use_container_width=True)
 
     else:
-        st.markdown("##### 📊 Real-Time Analytics Dashboard")
         st.info("👈 Fill in the property details on the left and click **Predict & Analyze Price** to view the interactive AI report.")
-
-# Footer مختصر في expander أسفل الشاشة
-with st.expander("ℹ️ About Model"):
-    t = meta["test_metrics"]
-    st.write(f"CatBoost Regressor | R² = {t['R2']} | MedAPE ≈ {t['MedAPE']}%")
