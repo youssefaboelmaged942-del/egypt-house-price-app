@@ -1,4 +1,5 @@
 streamlit
-catboost
 pandas
 numpy
+catboost
+plotly
